@@ -3,14 +3,17 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/UnitTests/JUnit5TestClass.java to edit this template
  */
 package com.mycompany.registration;
+import static com.mycompany.registration.Message.disregardedMessages;
+import static com.mycompany.registration.Message.sentMessages;
+import static com.mycompany.registration.Message.storedMessages;
 import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
-
+import org.junit.jupiter.api.BeforeEach;
 /**
  *
  * @author qhxme
  */
-
+//PART 2 UNIT TESTS
 public class MessageTest {
 
      // TEST Message Length Success
@@ -56,7 +59,7 @@ public class MessageTest {
        @Test
        public void testMessageHash() {
        Message msg = new Message("0012345678", "+27718693002", "Hi Mike, can you join us for dinner tonight?" );
-       String expected = "00:0:HITONIGHT?";
+       String expected = "00:29:HITONIGHT?";
        String actual = msg.createMessageHash("0012345678", "Hi Mike, can you join us for dinner tonight?");
        assertEquals(expected, actual);
        }
@@ -141,7 +144,7 @@ public class MessageTest {
     @Test
     public void testCreateMessageHash() {
     Message msg = new Message( "1234567890","+27718693002","Hi Mike, can you join us for dinner tonight?" );
-    String expectedHash = "12:1:HITONIGHT?";
+    String expectedHash = "12:157:HITONIGHT?";
     String actualHash = msg.createMessageHash("1234567890", "Hi Mike, can you join us for dinner tonight?");
     assertEquals(expectedHash, actualHash);
     }
@@ -224,6 +227,74 @@ public class MessageTest {
     msg1.handleMessageAction(1);
     msg2.handleMessageAction(1);
     assertEquals(2, Message.totalMessageNumber);
+    }
+    
+    
+    //PART 3 UNIT TESTS
+    
+    @BeforeEach
+    public void setup() {
+    Message.sentMessages.clear();
+    Message.storedMessages.clear();
+    Message.disregardedMessages.clear();
+
+        
+    populateTestData();
+    }
+    
+    public static void populateTestData() {
+    
+    Message m1 = new Message("1000000001","+27834557896","Did you get the cake?");
+    m1.messageStatus = "Sent";
+    sentMessages.add(m1);
+
+  
+    Message m2 = new Message("1000000002","+27838884567","Where are you? You are late! I have asked you to be on time.");
+    m2.messageStatus = "Stored";
+    storedMessages.add(m2);
+
+    
+    Message m3 = new Message("1000000003","+27834484567","Yhoooo, I am at your gate.");
+    m3.messageStatus = "Disregarded";
+    disregardedMessages.add(m3);
+
+   
+    Message m4 = new Message("1000000004","0838884567","It is dinner time!");
+    m4.messageStatus = "Sent";
+    sentMessages.add(m4);
+    
+    
+    Message m5 = new Message( "1000000005","+27838884567","Ok, I am leaving without you.");
+    m5.messageStatus = "Stored";
+    storedMessages.add(m5);
+    }
+
+    @Test
+    public void testSentMessagesArrayPopulated() {
+        assertEquals("Did you get the cake?", Message.sentMessages.get(0).messageInput);
+        assertEquals("It is dinner time!", Message.sentMessages.get(1).messageInput);
+    }
+
+    @Test
+    public void testLongestMessage() {
+        assertEquals("Where are you? You are late! I have asked you to be on time.", Message.getLongestStoredMessage());
+    }
+
+    @Test
+    public void testSearchMessageID() {
+        Message result = Message.searchMessageID("1000000004");
+        assertNull(result);
+    }
+
+    @Test
+    public void testSearchRecipientMessages() {
+        assertEquals( 2, Message.searchRecipientMessages("+27838884567").size());
+    }
+
+    @Test
+    public void testDeleteMessage() {
+	String hash = Message.storedMessages.get(0).messageHash;
+        assertTrue(Message.deleteMessage(hash));
     }
     
 }

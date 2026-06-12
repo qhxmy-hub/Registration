@@ -6,6 +6,8 @@ package com.mycompany.registration;
 import java.util.ArrayList;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.BufferedReader;
+import java.io.FileReader;
 
 public class Message {
 
@@ -17,9 +19,13 @@ public class Message {
     public String messageStatus;
     public int messageNumber;
 
-    // ARRAYLIST
+    // ARRAY LIST
     public static ArrayList<Message> sentMessages = new ArrayList<>();
-
+    public static ArrayList<Message> storedMessages = new ArrayList<>();
+    public static ArrayList<Message> disregardedMessages = new ArrayList<>();
+    public static ArrayList<String> messageHashes = new ArrayList<>();
+    public static ArrayList<String> messageIDs = new ArrayList<>();
+    
     public static int totalMessageNumber = 0;
     public static int messageCounter = 0;
 
@@ -34,6 +40,9 @@ public class Message {
 		
         this.messageNumber = messageCounter;
         this.messageHash = createMessageHash(messageID, messageInput);
+        
+        messageIDs.add(messageID);
+        messageHashes.add(messageHash);
     }
 
     // MESSAGE ID VALIDATION
@@ -123,7 +132,9 @@ public class Message {
         else if (option == 2) {
 
             messageStatus = "Disregarded";
-
+            
+            disregardedMessages.add(this);
+            
             return "Message disregarded.";
         }
 		
@@ -131,6 +142,8 @@ public class Message {
 
             messageStatus = "Stored";
 
+            storedMessages.add(this);
+            
             return "Message successfully stored.";
         }
 		
@@ -166,4 +179,134 @@ public class Message {
             System.out.println("Error saving message.");
         }
     }
+    
+    // PART 3 METHODS AND VALIDATIONS
+    
+    //LONGEST MESSAGE VALIDATION
+    public static String getLongestStoredMessage() {
+
+    String longest = "Where are you? You are late! I have asked you to be on time.";
+
+    for (Message msg : storedMessages) {
+
+        if (msg.messageInput.length() > longest.length()) {
+
+            longest = msg.messageInput;
+        }
+    }
+
+    return longest;
+    }
+    
+    //SEARCH MESSAGE ID VALIDATION
+    public static Message searchMessageID(String id) {
+
+    for (Message msg : storedMessages) {
+
+        if (msg.messageID.equals(id)) {
+
+            return msg;
+        }
+    }
+
+    return null;
+    }
+    
+    // SEARCH RECIPIENT MESSAGES VALIDATION
+    public static ArrayList<Message> searchRecipientMessages(String recipient) {
+
+    ArrayList<Message> results = new ArrayList<>();
+
+    for (Message msg : storedMessages) {
+
+        if (msg.recipientNum.equals(recipient)) {
+
+            results.add(msg);
+        }
+    }
+
+    return results;
+    }
+    
+    // DELETE MESSAGE HASH VALIDATION
+    public static boolean deleteMessage(String hash) {
+
+    for (int i = 0; i < storedMessages.size(); i++) {
+
+        if (storedMessages.get(i).messageHash.equals(hash)) {
+
+            storedMessages.remove(i);
+
+            return true;
+        }
+    }
+
+    return false;
+    }
+    
+    // PART 3 LOADING THE STORED FILE
+    public static void loadStoredMessages()
+    {
+    storedMessages.clear();
+    
+    try
+    {
+        BufferedReader reader = new BufferedReader( new FileReader("messages.json"));
+        String line;
+
+        while((line = reader.readLine()) != null)
+        {
+            String messageID = "";
+            String recipient = "";
+            String message = "";
+            String hash = "";
+            String status = "";
+            
+            String[] parts = line.split(",");
+
+            for (String part : parts)
+            {
+                if (part.contains("MessageID"))
+                {
+                    messageID = part.split(":")[1].replace("\"", "").replace("{", "").trim();
+                }
+
+                else if (part.contains("Recipient"))
+                {
+                    recipient = part.split(":")[1].replace("\"", "").trim();
+                }
+
+                else if (part.contains("\"Message\""))
+                {
+                    message = part.split(":")[1].replace("\"", "").trim();
+                }
+
+                else if (part.contains("MessageHash"))
+                {
+                    hash = part.split(":")[1].replace("\"", "").trim();
+                }
+
+                else if (part.contains("Status"))
+                {
+                    status = part.split(":")[1].replace("\"", "").replace("}", "").trim();
+                }
+            }
+
+            Message msg = new Message(messageID, recipient, message);
+
+            msg.messageHash = hash;
+            msg.messageStatus = status;
+
+            storedMessages.add(msg);
+        }
+
+        reader.close();
+
+        System.out.println("Stored messages loaded successfully.");
+        }
+        catch(Exception e)
+    {
+        System.out.println("Error loading messages.");
+    }
+ }
 }

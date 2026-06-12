@@ -110,7 +110,9 @@ import java.util.Random;
     //PART 2 QUICKCHAT APP 
        
         if (loginStatus == true) {
-                
+            
+            Message.loadStoredMessages();
+               
             System.out.println("\nWELCOME TO QUICKCHAT!");           
             System.out.print("How many messages do you want to send? ");
             int numberOfMessages = input.nextInt();
@@ -144,7 +146,7 @@ import java.util.Random;
              long randomID = 1000000000L +(long)(random.nextDouble() * 9000000000L);
              String messageID = String.valueOf(randomID);
 
-    // RECIPIENT
+    // RECIPIENT NUMBER
             String recipient;
 
             while (true) {
@@ -212,16 +214,168 @@ import java.util.Random;
 
         case 2 -> System.out.println("Coming Soon!");
 
-        case 3 -> {input.close();
+        case 3 ->{input.close();
                    System.exit(0);
                   }
         default -> System.out.println("Invalid Option. Please Try Again.");
+           }
+           
+        //PART 3 STORING DATA    
+                 
+        // STORED MESSAGES MENU
+        int stored = 0;
+
+        while (stored != 7) {
+
+            System.out.println("\n STORED MESSAGES MENU");
+            System.out.println("1. Display sender and recipient stored messages.");
+            System.out.println("2. Display the longest stored message.");
+            System.out.println("3. Search for messageID and display it's message and recipient.");
+            System.out.println("4. Search for messages stored for a certain recipient.");
+            System.out.println("5. Delete a message by using message hash.");
+            System.out.println("6. Display a report that shows all stored stored messages and details.");
+            System.out.println("7. Exit to send some more messages.");
+            System.out.print("Choose option: ");
+            
+            stored = input.nextInt();
+            input.nextLine();
+
+        switch (stored) {
+
+    // DISPLAY THE SENDER AND RECIPIENT'S STORED MESSAGES
+    case 1:
+
+        if (Message.storedMessages.isEmpty()) {
+        System.out.println("No messages found.");
         }
-      }
-           input.close();
+        else {
+		for (Message msg : Message.storedMessages) {
+                System.out.println("\nRecipient: " + msg.recipientNum);
+                System.out.println("Message: " + msg.messageInput);
+                System.out.println("Message Hash: " + msg.messageHash);
+                System.out.println("Message ID: " + msg.messageID);
+            }
+        }
+        break;
+
+    // DISPLAY THE LONGEST MESSAGE
+    case 2:
+
+        if (Message.storedMessages.isEmpty()) {
+        System.out.println("No messages found.");
+        }
+        else { 
+		Message longest = Message.storedMessages.get(0);
+                for (Message msg : Message.storedMessages) {
+                if (msg.messageInput.length() > longest.messageInput.length()) {
+                    longest = msg;
+                }
+            }
+            System.out.println("Longest Message:");
+            System.out.println(longest.messageInput);
+        }
+        break;
+
+    // SEARCH MESSAGE ID AND SHOW CORRECT MESSAGE AND RECIPIENT
+    case 3:
+
+        System.out.print("Enter Message ID: ");
+        String searchID = input.nextLine();
+		
+        boolean foundID = false;
+		
+        for (Message msg : Message.storedMessages) {
+		
+            if (msg.messageID.equals(searchID)) {
+                System.out.println("Recipient: " + msg.recipientNum);
+                System.out.println("Message: "+ msg.messageInput);
+                foundID = true;
+                break;
+            }
+        }
+
+        if (!foundID) {
+            System.out.println("Message ID not found.");
+        }
+        break;
+
+    // SEARCH STORED MESSAGES BY THE RECIPIENT
+    case 4:
+
+        System.out.print("Enter Recipient Number: ");
+        String searchRecipient = input.nextLine();
+		
+        boolean foundRecipient = false;
+		
+        for (Message msg : Message.storedMessages) {
+		
+            if (msg.recipientNum.equals(searchRecipient)) {
+                System.out.println("Message ID: " + msg.messageID);
+                System.out.println("Message: " + msg.messageInput);
+                foundRecipient = true;
+            }
+        }
+
+        if (!foundRecipient) {
+            System.out.println("No messages found.");
+        }
+        break;
+
+    // DELETE MESSAGE USING THE MESSAGE HASH
+    case 5:
+
+        System.out.print("Enter Message Hash: ");
+        String searchHash = input.nextLine();
+        boolean deleted = false;
+
+        for (int i = 0; i < Message.storedMessages.size(); i++) {
+
+            if (Message.storedMessages.get(i).messageHash.equals(searchHash)) {
+                Message.storedMessages.remove(i);
+                System.out.println("Message deleted successfully.");
+                deleted = true;
+                break;
+            }
+        }
+
+        if (!deleted) {
+            System.out.println("Message hash not found.");
+        }
+        break;
+
+    // FULL REPORT OF ALL STORED MESSAGES
+    case 6:
+
+        if (Message.storedMessages.isEmpty()) {
+            System.out.println("No messages found.");
+        }
+        else {
+            for (Message msg : Message.storedMessages) {
+			
+                System.out.println("                   ");
+                System.out.println("Message ID: " + msg.messageID);
+                System.out.println("Recipient: " + msg.recipientNum);
+                System.out.println("Message: " + msg.messageInput);
+                System.out.println("Message Hash: " + msg.messageHash);
+                System.out.println("Status: " + msg.messageStatus);
+            }
+        }
+        break;
+
+    // EXIT STORED MENU
+    case 7:
+        System.out.println("Returning to QuickChat Menu.");
+        break;
+
+    default: System.out.println("Invalid option.");
+    
+           }
+          }
+         }
+        }
        }
       }
-     }
+     }      
     }
    }
-  }
+   
